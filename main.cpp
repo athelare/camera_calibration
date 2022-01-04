@@ -12,6 +12,9 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
 
+#define NOMINMAX
+
+#include "DvpFrameCapture.h"
 
 using namespace cv;
 using namespace std;
@@ -120,6 +123,7 @@ public:
 //                else
 //                    inputType = VIDEO_FILE;
             }
+#ifndef __DVPCAMERA_H__
             if (inputType == CAMERA){
                 inputCapture.open(cameraID);
                 inputCapture.set(CAP_PROP_FRAME_WIDTH, 10000);
@@ -130,10 +134,11 @@ public:
             }
             if (inputType == VIDEO_FILE)
                 inputCapture.open(input);
+#endif
             if (inputType != IMAGE_LIST && !inputCapture.isOpened())
                 inputType = INVALID;
             namedWindow("Camera View", WINDOW_FREERATIO);
-            resizeWindow("Camera View",931, 699);
+            resizeWindow("Camera View",816, 683);
         }
         if (inputType == INVALID)
         {
@@ -215,7 +220,7 @@ public:
 
     static bool readStringListFromPath(const string& path, vector<string>& l){
         l.clear();
-        regex pat(".*\\.(JPG|PNG)");
+        regex pat(".*\\.(JPG|PNG|png|jpg)");
         for (auto&fe : directory_iterator(path))
         {
             const auto& fp = fe.path();
@@ -258,7 +263,11 @@ public:
     int cameraID;
     vector<string> imageList;
     size_t atImageList;
+#ifdef __DVPCAMERA_H__
+    DVPFrameCapture inputCapture;
+#else
     VideoCapture inputCapture;
+#endif
     InputType inputType;
     bool goodInput;
     int flag;
@@ -470,7 +479,7 @@ int main(int argc, char* argv[])
                      mode == CALIBRATED ? "Calibrated" : "Press 'g' to start";
         int baseLine = 0;
         Size textSize = getTextSize(msg, 1, 10, 1, &baseLine);
-        Point textOrigin(view.cols - 2*textSize.width - 10, view.rows - 2*baseLine - 10);
+        Point textOrigin(50, view.rows - 2*baseLine - 10);
 
         if( mode == CAPTURING )
         {
